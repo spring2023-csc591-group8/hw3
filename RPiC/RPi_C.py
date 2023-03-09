@@ -4,7 +4,10 @@ broker_IP = 'broker.mqttdashboard.com'
 port = 8000
 keep_alive = 60
 
-topics = [("IoT/lightSensor", 2), ("IoT/threshold", 2), ("IoT/Light_status", 2)]
+threshold_value = None
+previous_decision = None
+
+topics = [("IoT/lightSensor", 2), ("IoT/threshold", 2)]
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -14,10 +17,22 @@ def on_connect(client, userdata, flags, rc):
         print("Did not connect to the Broker with result code " + str(rc))
 
 def on_message(client, userdata, message):
-    print("message received: " , str(message.payload.decode("utf-8")))
-    print("message topic = ", message.topic)
-    print("message qos = ", message.qos)
-    print("message retain flag = ", message.retain)
+    global threshold_value, previous_decision
+    payload = message.payload.decode("utf-8")
+
+    if message.topic == topics[1][0]:
+        threshold_value = float(payload)
+    else:
+        # Compare LDR value with threshold and generate binary result
+        ldr_value = float(payload)
+        if ldr_value >= threshold_value:
+            result = "TurnOff"
+        else:
+            result = "TurnOn"
+        # Compare result with previous decision and publish updated decision if changed
+        if result != previous_decision:
+            previous_decision = result
+            client.publish("IoT/Light_status", result, 2, True)
 
 def run():
     client = mqtt.Client("RPiC", transport = "websockets")
