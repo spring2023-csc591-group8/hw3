@@ -38,7 +38,7 @@ def on_message(client, userdata, message):
             client.publish("LightStatus", result, 2, True)
 
 def run():
-    client = mqtt.Client("RPiC", transport = "websockets")
+    client = mqtt.Client("RPiC")
     client.on_connect = on_connect
     client.on_message = on_message
     client.will_set("Status/RaspberryPiC", "offline", 2, True)
