@@ -48,8 +48,8 @@ def run():
         client.connect(broker_IP[0], port, keep_alive)
     except:
         client.connect(broker_IP[1], port, keep_alive)
-    client.loop_forever()
     client.subscribe(topics)
+    client.loop_forever()
 
 if __name__ == "__main__":
     run()
