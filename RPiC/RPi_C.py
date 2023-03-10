@@ -26,7 +26,6 @@ def on_message(client, userdata, message):
     else:
         ldr_value = float(payload)
 
-    print(f"LDR value: {ldr_value}")
     if threshold_value is not None and ldr_value is not None:
         # Compare LDR value with threshold and generate binary result
         if ldr_value >= threshold_value:
@@ -37,7 +36,6 @@ def on_message(client, userdata, message):
         if result != previous_decision:
             previous_decision = result
             client.publish("LightStatus", result, 2, True)
-            print("Published result")
 
 def run():
     client = mqtt.Client("RPiC")
