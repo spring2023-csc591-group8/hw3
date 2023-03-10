@@ -97,9 +97,9 @@ async def main():
     args = parser.parse_args()
 
     will = aiomqtt.Will(STATUS_TOPIC, "offline", qos=2, retain=True)
-    board = TelemetrixAIO(loop=asyncio.get_running_loop(), autostart=False)
+    board = TelemetrixAIO(autostart=False, close_loop_on_shutdown=False)
 
-    async with aiomqtt.Client(args.broker_address, client_id="RPiA", will=will) as client:
+    async with aiomqtt.Client(args.broker_address, client_id="RPiA", will=will, keepalive=1) as client:
         try:
             await client.publish(STATUS_TOPIC, "online", qos=2, retain=True)
             watcher = SensorWatcher(client, board)
@@ -110,8 +110,10 @@ async def main():
             current_task = asyncio.current_task()
             all_tasks.remove(current_task)
             await asyncio.gather(*all_tasks)
-        except asyncio.CancelledError as e:
-            pass
+        except BaseException as e:
+            print()
+            print("Caught exception:")
+            print_exception(e)
         finally:
             print()
             print("Shutting down gracefully")
