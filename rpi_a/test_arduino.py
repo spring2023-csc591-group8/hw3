@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
-from pyfirmata import Arduino, util
+import asyncio
+
+from telemetrix_aio.telemetrix_aio import TelemetrixAIO
 from time import sleep
 
 
-def main():
-    board = Arduino("/dev/ttyACM0")
-    led = 13
+async def process_value(data):
+    _, _, value, _ = data
+    print(value, flush=True)
 
-    it = util.Iterator(board)
-    it.start()
-    board.analog[0].enable_reporting()
 
-    while True:
-        value = board.analog[0].read()
-        print(value)
-        if value is not None and value > 0.5:
-            board.digital[led].write(1)
-        else:
-            board.digital[led].write(0)
-        sleep(0.2)
+
+
+async def main():
+    board = TelemetrixAIO("/dev/ttyACM0", loop=asyncio.get_running_loop(), autostart=False)
+    await board.start_aio()
+    await board.set_analog_scan_interval(100)
+    await board.set_pin_mode_analog_input(0, callback=process_value)
+
+    all_tasks = asyncio.all_tasks()
+    current_task = asyncio.current_task()
+    all_tasks.remove(current_task)
+    await asyncio.wait(all_tasks)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
 
