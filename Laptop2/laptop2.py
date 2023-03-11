@@ -4,13 +4,13 @@ import time
 from datetime import datetime
 from paho.mqtt import client as mqtt
 
-Broker_ip = '192.168.1.198'
+Broker_ip = '10.42.0.1'
 Port_num = 1883
 Keep_alive = 60
 
-Broker_Topics = [("IoT/lightSensor",2), ("IoT/threshold",2), ("IoT/Light_status",2), ("IoT/RpiA",2), ("IoT/RpiC",2)]
+Broker_Topics = [("lightSensor",2), ("threshold",2), ("LightStatus",2), ("Status/RaspberryPiA",2), ("Status/RaspberryPiC",2)]
 
-filename = 'LogFile.csv'
+filename = 'LogFile'
 
 def appendFile(content):
     file = open(filename, "a")
