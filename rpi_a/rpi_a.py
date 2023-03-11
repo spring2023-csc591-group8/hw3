@@ -14,7 +14,7 @@ from telemetrix_aio.telemetrix_aio import TelemetrixAIO
 class SensorWatcher:
     POT_PIN = 0
     LDR_PIN = 1
-    EPSILON = 0.02
+    EPSILON = 0.05
 
     POT_TOPIC = "threshold"
     LDR_TOPIC = "lightSensor"
@@ -34,13 +34,31 @@ class SensorWatcher:
     async def run(self):
         wait_time = 1
 
+        for i in range(5):
+            try:
+                await self.board.start_aio()
+                break
+            except RuntimeError as e:
+                if not str(e).startswith("No Arduino Found"):
+                    raise
+                print(f"Couldn't connect Arduino, running attempt {i+2}...")
+        else:
+            raise RuntimeError("Arduino connection failed")
+
+        # NB: With the loop above, there exists and edge case in which we will
+        # send the "offline" status before becoming online in the first place.
+        # It was decided that this behaviour is preferable to sending some data
+        # before setting the "online" status, which could happen if we send the
+        # "online" message after we finish Arduino setup
+        await self.client.publish(STATUS_TOPIC, "online", qos=2, retain=True)
+
         try:
             async with asyncio.timeout(wait_time):
                 await self._init_values()
         except TimeoutError:
             print("Unable to recover sensor values, starting from scratch")
 
-        await self.board.start_aio()
+
         await self.board.set_analog_scan_interval(100)
         await self.board.set_pin_mode_analog_input(
                 self.POT_PIN,
@@ -101,7 +119,6 @@ async def main():
 
     async with aiomqtt.Client(args.broker_address, client_id="RPiA", will=will, keepalive=1) as client:
         try:
-            await client.publish(STATUS_TOPIC, "online", qos=2, retain=True)
             watcher = SensorWatcher(client, board)
 
             await watcher.run()
