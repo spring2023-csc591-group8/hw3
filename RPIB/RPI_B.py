@@ -8,11 +8,11 @@ from collections import defaultdict
 from paho.mqtt import client as mqtt
 import RPi.GPIO as GPIO
 
-Broker_ip = '192.168.1.198'
+Broker_ip = '10.42.0.1'
 Port_num = 1883
 Keep_alive = 60
 
-Broker_Topics = [("IoT/Light_status",2), ("IoT/RpiA",2), ("IoT/RpiC",2)]
+Broker_Topics = [("LightStatus",2), ("Status/RaspberryPiA",2), ("Status/RaspberryPiC",2)]
 
 Rpi_A_status = 18
 Rpi_C_status = 16
@@ -33,9 +33,9 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, message):   
     if message.topic == Broker_Topics[0][0]:
-        if message.payload == b"turnoff":
+        if message.payload == b"TurnOff":
             GPIO.output(Light_status, GPIO.LOW)
-        elif message.payload == b"turnon":
+        elif message.payload == b"TurnOn":
             GPIO.output(Light_status, GPIO.HIGH)
     elif message.topic == Broker_Topics[1][0]:
         if message.payload == b"offline":
