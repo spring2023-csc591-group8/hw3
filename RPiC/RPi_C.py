@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 
 broker_IP = ['10.42.0.1', '10.42.0.210']
 port = 1883
-keep_alive = 60
+keep_alive = 5
 
 threshold_value = None
 ldr_value = None
