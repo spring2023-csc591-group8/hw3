@@ -14,7 +14,7 @@ pip install RPi.GPIO
 ```
 
 ## Procedure
-Initially update the `Broker_ip` and `Port_num`in the code file Laptop2.py to the Ip_address and Port of device where the Broker is currently running. 
+Initially update the `Broker_ip` and `Port_num`in the code file laptop2.py to the Ip_address and Port of device where the Broker is currently running. 
 
 Run the Laptop 2 code by executing the below command on a new terminal window
 ```
