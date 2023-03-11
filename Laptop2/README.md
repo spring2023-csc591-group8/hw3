@@ -1,4 +1,4 @@
-# IoT_Assignment_3 - (Laptop 2)
+# IoT_Assignment_3 - Laptop 2
 
 ## Environment
 - macOS Catalina Version 10.15.7
