@@ -1,0 +1,2 @@
+asyncio-mqtt==0.16.1
+telemetrix-aio==1.12
