@@ -32,8 +32,6 @@ class SensorWatcher:
         self.ldr_value_min = 1023
 
     async def run(self):
-        wait_time = 1
-
         for i in range(5):
             try:
                 await self.board.start_aio()
@@ -41,7 +39,7 @@ class SensorWatcher:
             except RuntimeError as e:
                 if not str(e).startswith("No Arduino Found"):
                     raise
-                print(f"Couldn't connect Arduino, running attempt {i+2}...")
+                print(f"Couldn't connect Arduino, running attempt {i+2}/5...")
         else:
             raise RuntimeError("Arduino connection failed")
 
@@ -53,7 +51,7 @@ class SensorWatcher:
         await self.client.publish(STATUS_TOPIC, "online", qos=2, retain=True)
 
         try:
-            async with asyncio.timeout(wait_time):
+            async with asyncio.timeout(1):
                 await self._init_values()
         except TimeoutError:
             print("Unable to recover sensor values, starting from scratch")
@@ -62,11 +60,9 @@ class SensorWatcher:
         await self.board.set_analog_scan_interval(100)
         await self.board.set_pin_mode_analog_input(
                 self.POT_PIN,
-                # differential=int(self.EPSILON * 1023),
                 callback=self._process_pot_value)
         await self.board.set_pin_mode_analog_input(
                 self.LDR_PIN,
-                # differential=int(self.EPSILON * 1023),
                 callback=self._process_ldr_value)
 
     def print_stats(self):
@@ -117,7 +113,7 @@ async def main():
     will = aiomqtt.Will(STATUS_TOPIC, "offline", qos=2, retain=True)
     board = TelemetrixAIO(autostart=False, close_loop_on_shutdown=False)
 
-    async with aiomqtt.Client(args.broker_address, client_id="RPiA", will=will, keepalive=1) as client:
+    async with aiomqtt.Client(args.broker_address, client_id="RPiA", will=will, keepalive=3) as client:
         try:
             watcher = SensorWatcher(client, board)
 
